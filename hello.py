@@ -1,18 +1,10 @@
-# Use an official lightweight Python image
-FROM python:3.12-slim
+from flask import Flask
 
-# Set the working directory
-WORKDIR /app
+app = Flask(__name__)
 
-# Copy dependency file and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+@app.route('/')
+def hello_world():
+    return "Hello, World!"
 
-# Copy the application code
-COPY . .
-
-# Expose Flask default port
-EXPOSE 5000
-
-# Run the app
-CMD ["python", "hello.py"]
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
