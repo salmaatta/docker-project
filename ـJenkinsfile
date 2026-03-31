@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // استبدلي 'salmaatta' باسم المستخدم الخاص بك في Docker Hub
+       
         DOCKER_HUB_USER = 'salmaatta'
         APP_NAME = 'docker-project'
         IMAGE_NAME = "${DOCKER_HUB_USER}/${APP_NAME}"
@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // سحب الكود من GitHub
+                GitHub
                 checkout scm
             }
         }
@@ -29,10 +29,10 @@ pipeline {
         stage('Test Container') {
             steps {
                 script {
-                    // تشغيل الحاوية للتجربة على بورت 8081
+                
                     sh "docker run -d --name my-test-app -p 8081:80 ${IMAGE_NAME}:${env.BUILD_NUMBER}"
                     echo "Checking if the site is reachable..."
-                    // انتظر قليلاً ثم تحقق من الاستجابة
+                    
                     sh "sleep 5 && curl -f http://localhost:8081"
                 }
             }
