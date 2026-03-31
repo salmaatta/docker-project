@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+
+    environment {
+        // استبدلي 'salmaatta' باسم المستخدم الخاص بك في Docker Hub
+        DOCKER_HUB_USER = 'salmaatta'
+        APP_NAME = 'docker-project'
+        IMAGE_NAME = "${DOCKER_HUB_USER}/${APP_NAME}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // سحب الكود من GitHub
+                checkout scm
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                script {
+                    echo "Building Docker Image: ${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker build -t ${IMAGE_NAME}:${env.BUILD_NUMBER} ."
+                    sh "docker tag ${IMAGE_NAME}:${env.BUILD_NUMBER} ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Test Container') {
+            steps {
+                script {
+                    // تشغيل الحاوية للتجربة على بورت 8081
+                    sh "docker run -d --name my-test-app -p 8081:80 ${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    echo "Checking if the site is reachable..."
+                    // انتظر قليلاً ثم تحقق من الاستجابة
+                    sh "sleep 5 && curl -f http://localhost:8081"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Cleaning up..."
+            sh "docker stop my-test-app || true"
+            sh "docker rm my-test-app || true"
+        }
+        success {
+            echo "Build and Test passed successfully!"
+        }
+        failure {
+            echo "Something went wrong in the pipeline."
+        }
+    }
+}
